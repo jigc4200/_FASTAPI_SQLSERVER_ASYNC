@@ -1,0 +1,134 @@
+import pyodbc
+from app.database import get_db_connection
+
+
+def get_wallets():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Wallets")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No wallets found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_transactions():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Transactions")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No transactions found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_payment_methods():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM PaymentMethods")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No payment methods found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_transaction_categories():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM TransactionCategories")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No transaction categories found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_transaction_details():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM TransactionDetails")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No transaction details found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+def get_users():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM Users"
+    cursor.execute(query)
+    results = cursor.fetchall()
+    conn.close()
+    
+    users = []
+    for row in results:
+        users.append({
+            "UserID": row.UserID,
+            "UserName": row.UserName,
+            "Email": row.Email,
+            "CreatedAt": row.CreatedAt
+        })
+    
+    return users
+
+def fetch_all_data(skip: int = 0, limit: int = 10000):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = f"""
+    SELECT 
+        u.UserID, u.UserName, u.Email, u.CreatedAt AS UserCreatedAt,
+        w.WalletID, w.Balance, w.Currency, w.CreatedAt AS WalletCreatedAt,
+        t.TransactionID, t.Amount, t.TransactionType, t.Timestamp,
+        pm.PaymentMethodID, pm.MethodName, pm.AccountNumber, pm.ExpiryDate, pm.IsDefault, pm.CreatedAt AS PaymentMethodCreatedAt,
+        tc.CategoryID, tc.CategoryName, tc.Description, tc.CreatedAt AS CategoryCreatedAt,
+        td.DetailID, td.SubAmount, td.Note, td.CreatedAt AS DetailCreatedAt
+    FROM Users u
+    LEFT JOIN Wallets w ON u.UserID = w.UserID
+    LEFT JOIN Transactions t ON w.WalletID = t.WalletID
+    LEFT JOIN PaymentMethods pm ON u.UserID = pm.UserID
+    LEFT JOIN TransactionDetails td ON t.TransactionID = td.TransactionID
+    LEFT JOIN TransactionCategories tc ON td.CategoryID = tc.CategoryID
+    ORDER BY u.UserID
+    OFFSET {skip} ROWS FETCH NEXT {limit} ROWS ONLY;
+    """
+    
+    cursor.execute(query)
+    results = cursor.fetchall()
+    conn.close()
+    
+    if not results:
+        raise HTTPException(status_code=404, detail="No data found")
+    
+    data = []
+    for row in results:
+        data.append({
+            "UserID": row.UserID,
+            "UserName": row.UserName,
+            "Email": row.Email,
+            "UserCreatedAt": row.UserCreatedAt,
+            "WalletID": row.WalletID,
+            "Balance": row.Balance,
+            "Currency": row.Currency,
+            "WalletCreatedAt": row.WalletCreatedAt,
+            "TransactionID": row.TransactionID,
+            "Amount": row.Amount,
+            "TransactionType": row.TransactionType,
+            "Timestamp": row.Timestamp,
+            "PaymentMethodID": row.PaymentMethodID,
+            "MethodName": row.MethodName,
+            "AccountNumber": row.AccountNumber,
+            "ExpiryDate": row.ExpiryDate,
+            "IsDefault": row.IsDefault,
+            "PaymentMethodCreatedAt": row.PaymentMethodCreatedAt,
+            "CategoryID": row.CategoryID,
+            "CategoryName": row.CategoryName,
+            "Description": row.Description,
+            "CategoryCreatedAt": row.CategoryCreatedAt,
+            "DetailID": row.DetailID,
+            "SubAmount": row.SubAmount,
+            "Note": row.Note,
+            "DetailCreatedAt": row.DetailCreatedAt
+        })
+    
+    return data

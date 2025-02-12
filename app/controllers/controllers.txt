@@ -1,0 +1,63 @@
+from fastapi import HTTPException
+from app.database import get_db_connection
+from app.models.models import User, Wallet, Transaction, PaymentMethod, TransactionCategory, TransactionDetail
+
+def get_users():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Users")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No users found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_wallets():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Wallets")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No wallets found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_transactions():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Transactions")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No transactions found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_payment_methods():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM PaymentMethods")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No payment methods found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_transaction_categories():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM TransactionCategories")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No transaction categories found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+
+def get_transaction_details():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM TransactionDetails")
+    rows = cursor.fetchall()
+    conn.close()
+    if not rows:
+        raise HTTPException(status_code=404, detail="No transaction details found")
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
