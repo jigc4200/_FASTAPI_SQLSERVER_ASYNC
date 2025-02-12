@@ -1,0 +1,31 @@
+# Ignorar el entorno virtual
+.venv/
+venv/
+env/
+
+# Ignorar archivos de configuración de IDE
+.vscode/
+.idea/
+
+# Ignorar archivos de Python compilados
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar archivos de caché y logs
+*.log
+*.sqlite3
+
+# Ignorar archivos de configuración local
+.env
+.env.local
+
+# Ignorar archivos generados por el sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos de distribución y build
+dist/
+build/
+*.egg-info/
